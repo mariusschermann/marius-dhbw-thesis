@@ -15,6 +15,7 @@ Die Vorlage stellt unter anderem folgende Bestandteile bereit:
 - Abbildungsverzeichnis
 - Abkürzungsverzeichnis
 - optionaler Sperrvermerk
+- optionaler Abstract mit Metadaten
 - optionaler Gender-Hinweis
 - optionaler Anhang
 - Literaturverzeichnis
@@ -27,23 +28,55 @@ Die Vorlage stellt unter anderem folgende Bestandteile bereit:
 
 In Typst Web kann über **Start from template** ein neues Projekt auf Basis der Vorlage erstellt werden.
 
-Bei lokaler Verwendung kann ein neues Projekt über die Typst-CLI angelegt werden:
+Nach Veröffentlichung von Version 0.2.0 kann ein neues Projekt über die Typst-CLI angelegt werden:
 
 ```bash
-typst init @preview/marius-dhbw-thesis:0.1.0
+typst init @preview/marius-dhbw-thesis:0.2.0
 ```
 
 ## Verwendung als Package
 
-Das Package kann in einem bestehenden Typst-Projekt importiert werden:
+Nach Veröffentlichung kann das Package in einem bestehenden Typst-Projekt importiert werden:
 
 ```typst
-#import "@preview/marius-dhbw-thesis:0.1.0": (
+#import "@preview/marius-dhbw-thesis:0.2.0": (
   dhbw-template,
   vglcite,
   vglcites,
 )
 ```
+
+## Lokale Entwicklung
+
+Die finale `template/main.typ` verwendet den Package-Import für Version 0.2.0.
+Für lokale Entwicklungs- und Kompilierungstests kann dieser Import vorübergehend
+durch den relativen Import ersetzt werden, insbesondere solange Version 0.2.0
+noch nicht veröffentlicht ist:
+
+```typst
+#import "../lib.typ": (
+  dhbw-template,
+  vglcite,
+  vglcites,
+)
+```
+
+Vom Repository-Hauptverzeichnis aus mit Typst 0.15.0 oder neuer kompilieren:
+
+```bash
+typst compile --root . template/main.typ thesis.pdf
+```
+
+`--root .` erlaubt den Zugriff auf `lib.typ` und `src/` außerhalb von
+`template/`. So werden tatsächlich die lokalen Änderungen getestet und nicht
+eine bereits veröffentlichte Package-Version.
+
+Nach dem lokalen Test den Import wieder auf
+`@preview/marius-dhbw-thesis:0.2.0` zurücksetzen. Der relative Entwicklungsimport
+darf nicht veröffentlicht werden: `typst init` kopiert nur das
+Vorlagenverzeichnis; `../lib.typ` würde im daraus erzeugten Projekt nicht
+existieren. Der Package-Import löst die Bibliothek unabhängig vom
+Vorlagenverzeichnis auf.
 
 ## Grundprinzip
 
@@ -80,17 +113,108 @@ Abweichungen werden als zusätzliche Parameter übergeben:
 
 Es müssen nur die Parameter angegeben werden, die vom Standard abweichen sollen.
 
-## Minimales Beispiel
+## Sprache umschalten
+
+Mit `english: true` wird die Vorlage auf Englisch umgestellt. Standard ist
+`english: false` (Deutsch):
 
 ```typst
-#import "@preview/marius-dhbw-thesis:0.1.0": (
+#show: body => dhbw-template(
+  english: true,
+  meta: meta,
+  bibliography-content: references,
+  body,
+)
+```
+
+Der Schalter steuert die Typst-Textsprache (einschließlich Silbentrennung und
+automatischer Bezeichnungen), alle Standard-Verzeichnisüberschriften, die
+ehrenwörtliche Erklärung samt Datumsbeschriftung sowie das Titelblatt:
+sämtliche Datenlabels. Hochschulname, „Fakultät Wirtschaft“ und der Studienpräfix
+„Studienrichtung BWL –“ bleiben auch in der englischen Vorlage auf Deutsch; alle sind weiterhin
+individuell überschreibbar. Für
+`meta.art-der-arbeit: auto` wechselt der Standard-Arbeitstyp von `Bachelorarbeit`
+zu `Bachelor's Thesis`.
+Die Zitathelfer verwenden in englischem Text `cf.` statt
+`vgl.` und sprachabhängige Anführungszeichen für Kurztitel.
+
+Eigene Inhalte werden nicht übersetzt: Metadaten (einschließlich
+`meta.art-der-arbeit` und `meta.studienrichtung`), Kapitel, Sperrvermerk,
+Gender-Hinweis und ein eigener `declaration-content` müssen in der gewünschten
+Sprache angegeben werden. Im Beispielprojekt wird `english` einmal vor den
+Metadaten definiert. `art-der-arbeit: auto` wird ausschließlich im Template
+aufgelöst; ein expliziter Arbeitstyp wie `"Master's Thesis"` bleibt unverändert.
+
+Individuelle Vorgaben wie `table-of-contents-title`, `institution-name`,
+`faculty-name` oder `study-prefix` haben weiterhin Vorrang. Der Wert `auto`
+verwendet jeweils den sprachabhängigen Standard. Das gilt auch für `language`:
+Eine explizite Angabe wie `language: "en"` überschreibt die Textsprache, ändert
+aber nicht die durch `english` gewählten Vorlagentexte.
+
+### Überschriften individuell überschreiben
+
+```typst
+#show: body => dhbw-template(
+  english: true,
+  meta: meta,
+  table-of-contents-title: [Contents],
+  bibliography-title: [Bibliography],
+  institution-name: [My University],
+  bibliography-content: references,
+  body,
+)
+```
+
+Alle bisherigen Parameter bleiben überschreibbar. Ein expliziter Wert hat
+Vorrang vor der automatischen Sprachauflösung; `auto` aktiviert wieder den
+sprachabhängigen Standard. `declaration-content` ersetzt den Standardtext der
+Erklärung unabhängig von der Sprache.
+
+### Textsprache individuell überschreiben
+
+| `english` | `language` | Feste Vorlagentexte | Typst-Textsprache | Zitatpräfix |
+| --- | --- | --- | --- | --- |
+| `false` | `auto` | Deutsch | `de` | `vgl.` |
+| `true` | `auto` | Englisch | `en` | `cf.` |
+| `true` | `"de"` | Englisch | `de` | `vgl.` |
+| `false` | `"en"` | Deutsch | `en` | `cf.` |
+
+Beispiel für englische Beschriftungen mit deutscher Textsprache:
+
+```typst
+#show: body => dhbw-template(
+  english: true,
+  language: "de",
+  meta: meta,
+  bibliography-content: references,
+  body,
+)
+```
+
+`language` steuert unter anderem Silbentrennung, automatische Typst-Bezeichnungen
+und Anführungszeichen. Die Zitathelfer lesen die aktive Textsprache über
+`text.lang` in `context`: Bei `"en"` verwenden sie `cf.`, ansonsten `vgl.`.
+Auch eine lokale Änderung der Textsprache wird berücksichtigt. Die festen
+Vorlagentexte und der Standardtext der Erklärung richten sich dagegen nach
+`english`.
+
+## Deutsches Beispiel
+
+Das Beispiel setzt eine `bibliography.bib` wie im Abschnitt Literaturverzeichnis
+voraus. Für lokale Tests im Repository den oben beschriebenen lokalen Import
+verwenden; der Package-Import gilt nach Veröffentlichung.
+
+```typst
+#import "@preview/marius-dhbw-thesis:0.2.0": (
   dhbw-template,
   vglcite,
   vglcites,
 )
 
+#let english = false
+
 #let meta = (
-  art-der-arbeit: "Bachelorarbeit",
+  art-der-arbeit: auto,
   titel-der-arbeit: "Titel der wissenschaftlichen Arbeit",
 
   titel-zeile1: [
@@ -105,6 +229,7 @@ Es müssen nur die Parameter angegeben werden, die vom Standard abweichen sollen
 
   abteilung: "Abteilung",
   firma: "Unternehmen, Ort",
+  studienjahrgang: "Studienjahrgang",
   kurs: "Kurs",
   studienrichtung: "Digital Business Management",
   matrikelnummer: "1234567",
@@ -118,6 +243,11 @@ Es müssen nur die Parameter angegeben werden, die vom Standard abweichen sollen
 
 #let acronyms = ()
 
+#let abstract = [
+  Diese Arbeit untersucht eine betriebliche Problemstellung.
+  Hier werden Fragestellung, Vorgehensweise und zentrale Ergebnisse zusammengefasst.
+]
+
 #let references = bibliography(
   "bibliography.bib",
   title: none,
@@ -125,8 +255,10 @@ Es müssen nur die Parameter angegeben werden, die vom Standard abweichen sollen
 )
 
 #show: body => dhbw-template(
+  english: english,
   meta: meta,
   acronyms: acronyms,
+  abstract: abstract,
   bibliography-content: references,
   body,
 )
@@ -136,13 +268,86 @@ Es müssen nur die Parameter angegeben werden, die vom Standard abweichen sollen
 Hier beginnt die wissenschaftliche Arbeit.
 ```
 
+## English Example
+
+This complete example uses the `mustermann2025` entry from the bibliography
+example below. User-provided metadata and content must be supplied in English;
+the template does not translate them. For local development, replace the
+package import with `../lib.typ` and compile with the repository as root.
+
+```typst
+#import "@preview/marius-dhbw-thesis:0.2.0": (
+  dhbw-template,
+  vglcite,
+  vglcites,
+)
+
+#let english = true
+
+#let meta = (
+  art-der-arbeit: auto,
+  titel-der-arbeit: "Digital Transformation in Business",
+  titel-zeile1: [Digital Transformation in Business],
+  titel-zeile2: [],
+  autor-der-arbeit: "Alex Smith",
+  anschrift-zeile1: "10 Example Street",
+  anschrift-zeile2: "68163 Mannheim, Germany",
+  abteilung: "Digital Strategy",
+  firma: "Example Company, Mannheim",
+  studienjahrgang: "2023",
+  kurs: "WDBM23A",
+  studienrichtung: "Digital Business Management",
+  matrikelnummer: "1234567",
+  studiengangsleiter: "Prof. Taylor",
+  wiss-betreuer: "Dr. Morgan",
+  firmen-betreuer: "Robin Jones",
+  abgabedatum: "24 October 2026",
+)
+
+#let acronyms = (("API", "Application Programming Interface"),)
+#let nondisclosure = none
+#let abstract = [
+  This thesis examines digital transformation in business.
+  Replace this example with a summary of the research question,
+  methodology, and principal findings.
+]
+#let gender-notice = none
+#let appendix = none
+
+#let references = bibliography(
+  "bibliography.bib",
+  title: none,
+  style: "harvard-cite-them-right",
+)
+
+#show: body => dhbw-template(
+  english: english,
+  meta: meta,
+  acronyms: acronyms,
+  nondisclosure: nondisclosure,
+  abstract: abstract,
+  gender-notice: gender-notice,
+  appendix: appendix,
+  bibliography-content: references,
+  body,
+)
+
+= Introduction
+
+This thesis examines digital transformation in business
+#vglcite(<mustermann2025>, loc: [p. 10]).
+```
+
+The default declaration is a starting point, not an approved legal statement.
+Check its wording against your faculty's current requirements before submission.
+
 ## Metadaten
 
 Die Angaben zur Arbeit werden als Dictionary definiert:
 
 ```typst
 #let meta = (
-  art-der-arbeit: "Bachelorarbeit",
+  art-der-arbeit: auto,
   titel-der-arbeit: "Titel der Bachelorarbeit",
 
   titel-zeile1: [
@@ -157,6 +362,7 @@ Die Angaben zur Arbeit werden als Dictionary definiert:
 
   abteilung: "Abteilung",
   firma: "Unternehmen, Ort",
+  studienjahrgang: "Studienjahrgang",
   kurs: "Kurs",
   studienrichtung: "Digital Business Management",
   matrikelnummer: "1234567",
@@ -182,6 +388,55 @@ titel-zeile2: [
 ```
 
 `titel-der-arbeit` enthält unabhängig davon den vollständigen Titel, unter anderem für die ehrenwörtliche Erklärung.
+
+`studienjahrgang` enthält den Studienjahrgang (zum Beispiel `"2023"`) und wird
+zusammen mit `kurs` auf dem Titelblatt ausgegeben. Bei bestehenden Metadaten
+ohne dieses Feld bleibt die bisherige Kurszeile erhalten. Laut Leitfaden sind
+beide Angaben erforderlich; alternativ können beide bereits im Kurswert stehen.
+
+## Abstract
+
+Der Leitfaden vom 14.01.2020 verlangt für Bachelorarbeiten eine einseitige
+Zusammenfassung mit Problemstellung, Vorgehensweise und Ergebnissen. Sie steht
+nach dem optionalen Sperrvermerk und vor dem Inhaltsverzeichnis:
+
+```typst
+#let abstract = [
+  Hier steht die Zusammenfassung der konkreten Arbeit.
+]
+
+#show: body => dhbw-template(
+  english: english,
+  meta: meta,
+  abstract: abstract,
+  bibliography-content: references,
+  body,
+)
+```
+
+Titel, Name, Matrikelnummer, Studienjahrgang und Kurs werden aus `meta`
+übernommen. `abstract-title` überschreibt die Überschrift. Ohne Abstract
+(`abstract: none`, der Standard) entsteht keine zusätzliche Seite. Das hält
+Projekt- und Seminararbeiten sowie bestehende Aufrufe kompatibel; bei einer
+Bachelorarbeit muss der Inhalt ausdrücklich ergänzt werden. Der Text wird
+nicht automatisch erzeugt oder übersetzt. Die Länge auf eine Seite begrenzen
+und den Abstract zusätzlich wie im Leitfaden verlangt auf Moodle hochladen.
+
+## Seitenzählung und Erklärung
+
+Das Titelblatt zählt als I, ohne sichtbare Nummer. Ein Sperrvermerk wird weder
+nummeriert noch in die Zählung einbezogen. Er erscheint nicht im
+Inhaltsverzeichnis, bleibt aber als PDF-Lesezeichen erreichbar.
+Der übrige Vorspann beginnt bei II,
+der Hauptteil bei 1. Der Nachlauf setzt die römische Folge ohne Zahlensprung
+fort. Diese Fehlerkorrektur verändert gegenüber früheren Versionen die
+Seitenzahlen; Verzeichnisse und Querverweise werden automatisch aktualisiert.
+
+Die deutsche Standarderklärung verwendet den Wortlaut aus Abschnitt 4.9.12
+(„mit dem Thema:“). Ort, Datum und die eigenhändige Unterschrift sind bei allen
+gedruckten Exemplaren erforderlich; die Vorlage ersetzt die Unterschrift nicht.
+Ein eigener `declaration-content` bleibt vorrangig. Für die englische Übersetzung
+enthält der Leitfaden keinen verbindlichen Wortlaut.
 
 ## Kapitel erstellen
 
@@ -266,6 +521,16 @@ Die Includes werden unterhalb des Aufrufs von `dhbw-template` eingefügt.
 ```
 
 ### Absatzformatierung ändern
+
+Im Haupttext bedeuten `paragraph-leading: auto` und `paragraph-spacing: auto`
+einen Grundlinienabstand von 1,5 Schriftgrößen und eine zusätzliche Leerzeile
+zwischen Absätzen (bei 12 pt: 18 pt innerhalb eines Absatzes, 36 pt zwischen
+den angrenzenden Textzeilen zweier Absätze). Die Berechnung berücksichtigt die
+Schriftmetriken. Das ist die hier verwendete Umsetzung des 1,5-fachen Abstands;
+Typst-`leading` allein bezeichnet nur den Zwischenraum zwischen den Textzeilen.
+Titelblatt, Verzeichnisse und Fußnoten behalten ihre eigenen Abstände.
+Die geänderten Standardabstände können den Seitenumbruch des Haupttexts ändern.
+Explizite Werte wie im folgenden Beispiel haben weiterhin Vorrang.
 
 ```typst
 #show: body => dhbw-template(
@@ -426,7 +691,7 @@ Ein Sperrvermerk wird als Inhalt definiert:
   Der Inhalt dieser Arbeit darf weder als Ganzes noch in
   Auszügen Personen außerhalb des Prüfungs- und
   Evaluationsverfahrens zugänglich gemacht werden, sofern
-  keine anders lautende Genehmigung des Unternehmens vorliegt.
+  keine anders lautende Genehmigung des Dualen Partners vorliegt.
 ]
 ```
 
@@ -570,6 +835,31 @@ bibliography-content: none,
 ## Quellen zitieren
 
 Das Package stellt die Funktionen `vglcite` und `vglcites` bereit.
+
+Die Fundstelle `loc` wird unverändert ausgegeben und nicht übersetzt.
+In deutschen Dokumenten zum Beispiel `[S. 10]`, in englischen `[p. 10]`
+beziehungsweise `[pp. 10–12]` verwenden. Auch manuelle Jahresangaben wie
+`[o. J.]` oder `[n.d.]` werden nicht automatisch übersetzt.
+
+### Englische Fundstellen
+
+Bei aktiver Textsprache `"en"`:
+
+```typst
+#vglcite(<mustermann2025>, loc: [p. 10])
+
+#vglcites(
+  (<mustermann2025>, [p. 10]),
+  (<mustermann2025>, [pp. 20–22]),
+)
+```
+
+Mit dem verwendeten Harvard-Stil:
+
+```text
+(cf. Mustermann, 2025, p. 10)
+(cf. Mustermann, 2025, p. 10; Mustermann, 2025, pp. 20–22)
+```
 
 ### Einzelzitat mit Fundstelle
 

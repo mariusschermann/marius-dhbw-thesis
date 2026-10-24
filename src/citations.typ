@@ -119,11 +119,25 @@
 
   let short-title = short-title-resolver(key)
 
-  [
-    (vgl. #cite(key, form: "author"), #year
-    #if short-title != none {[, „#short-title“]}
-    #if loc != none {[, #loc]})
-  ]
+  context {
+    let prefix = if text.lang == "en" {
+      [cf. ]
+    } else {
+      [vgl. ]
+    }
+
+    let citation = [#prefix#cite(key, form: "author"), #year]
+
+    if short-title != none {
+      citation += [, #quote(short-title)]
+    }
+
+    if loc != none {
+      citation += [, #loc]
+    }
+
+    [(#citation)]
+  }
 }
 
 
@@ -216,12 +230,28 @@
 
     let short-title = short-title-resolver(key)
 
-    [
-      #cite(key, form: "author"), #year
-      #if short-title != none {[, „#short-title“]}
-      #if loc != none {[, #loc]}
-    ]
+    context {
+      let citation = [#cite(key, form: "author"), #year]
+
+      if short-title != none {
+        citation += [, #quote(short-title)]
+      }
+
+      if loc != none {
+        citation += [, #loc]
+      }
+
+      citation
+    }
   })
 
-  [(vgl. #parts.join([; ]))]
+  context {
+    let prefix = if text.lang == "en" {
+      [cf. ]
+    } else {
+      [vgl. ]
+    }
+
+    [(#prefix#parts.join([; ]))]
+  }
 }

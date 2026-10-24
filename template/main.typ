@@ -1,15 +1,19 @@
-#import "@preview/marius-dhbw-thesis:0.1.0": (
+#import "@preview/marius-dhbw-thesis:0.2.0": (
   dhbw-template,
   vglcite,
   vglcites,
 )
+
+// false = deutsche Vorlage
+// true = englische Vorlage
+#let english = false
 
 // ============================================================
 // Metadaten der Arbeit
 // ============================================================
 
 #let meta = (
-  art-der-arbeit: "Bachelorarbeit",
+  art-der-arbeit: auto,
   titel-der-arbeit: "Titel der wissenschaftlichen Arbeit",
 
   titel-zeile1: [
@@ -24,6 +28,7 @@
 
   abteilung: "Abteilung",
   firma: "Unternehmen, Ort",
+  studienjahrgang: "Studienjahrgang",
   kurs: "Kurs",
   studienrichtung: "Digital Business Management",
   matrikelnummer: "1234567",
@@ -46,6 +51,7 @@
 // ============================================================
 
 #let nondisclosure = none
+#let abstract = none
 #let gender-notice = none
 #let appendix = none
 
@@ -64,10 +70,12 @@
 // ============================================================
 
 #show: body => dhbw-template(
+  english: english,
   meta: meta,
 
   acronyms: acronyms,
   nondisclosure: nondisclosure,
+  abstract: abstract,
   gender-notice: gender-notice,
   appendix: appendix,
 
