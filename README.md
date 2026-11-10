@@ -631,16 +631,39 @@ project/
     height: 2cm,
     fit: "contain",
   ),
+  company-logo-align: left + top,
 
   university-logo: image(
     "img/hochschullogo.png",
     height: 2cm,
     fit: "contain",
   ),
+  university-logo-align: right + top,
 
   bibliography-content: references,
   body,
 )
+```
+
+Beide Logos können unabhängig über die gesamte obere Seitenbreite mit `left`,
+`center` oder `right` ausgerichtet werden. Auch die Positionen können getauscht
+werden:
+
+```typst
+company-logo-align: right + top,
+university-logo-align: left + top,
+```
+
+Bei nur einem Logo kann dieses beispielsweise mittig platziert werden:
+
+```typst
+company-logo: none,
+university-logo: image(
+  "img/hochschullogo.png",
+  height: 2cm,
+  fit: "contain",
+),
+university-logo-align: center + top,
 ```
 
 Falls kein Logo verwendet werden soll:
