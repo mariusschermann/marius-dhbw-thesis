@@ -28,10 +28,10 @@ Die Vorlage stellt unter anderem folgende Bestandteile bereit:
 
 In Typst Web kann über **Start from template** ein neues Projekt auf Basis der Vorlage erstellt werden.
 
-Nach Veröffentlichung von Version 0.2.0 kann ein neues Projekt über die Typst-CLI angelegt werden:
+Nach Veröffentlichung von Version 0.3.0 kann ein neues Projekt über die Typst-CLI angelegt werden:
 
 ```bash
-typst init @preview/marius-dhbw-thesis:0.2.0
+typst init @preview/marius-dhbw-thesis:0.3.0
 ```
 
 ## Verwendung als Package
@@ -39,7 +39,7 @@ typst init @preview/marius-dhbw-thesis:0.2.0
 Nach Veröffentlichung kann das Package in einem bestehenden Typst-Projekt importiert werden:
 
 ```typst
-#import "@preview/marius-dhbw-thesis:0.2.0": (
+#import "@preview/marius-dhbw-thesis:0.3.0": (
   dhbw-template,
   vglcite,
   vglcites,
@@ -48,9 +48,9 @@ Nach Veröffentlichung kann das Package in einem bestehenden Typst-Projekt impor
 
 ## Lokale Entwicklung
 
-Die finale `template/main.typ` verwendet den Package-Import für Version 0.2.0.
+Die finale `template/main.typ` verwendet den Package-Import für Version 0.3.0.
 Für lokale Entwicklungs- und Kompilierungstests kann dieser Import vorübergehend
-durch den relativen Import ersetzt werden, insbesondere solange Version 0.2.0
+durch den relativen Import ersetzt werden, insbesondere solange Version 0.3.0
 noch nicht veröffentlicht ist:
 
 ```typst
@@ -72,7 +72,7 @@ typst compile --root . template/main.typ thesis.pdf
 eine bereits veröffentlichte Package-Version.
 
 Nach dem lokalen Test den Import wieder auf
-`@preview/marius-dhbw-thesis:0.2.0` zurücksetzen. Der relative Entwicklungsimport
+`@preview/marius-dhbw-thesis:0.3.0` zurücksetzen. Der relative Entwicklungsimport
 darf nicht veröffentlicht werden: `typst init` kopiert nur das
 Vorlagenverzeichnis; `../lib.typ` würde im daraus erzeugten Projekt nicht
 existieren. Der Package-Import löst die Bibliothek unabhängig vom
@@ -205,7 +205,7 @@ voraus. Für lokale Tests im Repository den oben beschriebenen lokalen Import
 verwenden; der Package-Import gilt nach Veröffentlichung.
 
 ```typst
-#import "@preview/marius-dhbw-thesis:0.2.0": (
+#import "@preview/marius-dhbw-thesis:0.3.0": (
   dhbw-template,
   vglcite,
   vglcites,
@@ -279,7 +279,7 @@ title-page data grid without leaving blank rows. English metadata keys shown
 below can be used interchangeably with the existing German keys.
 
 ```typst
-#import "@preview/marius-dhbw-thesis:0.2.0": (
+#import "@preview/marius-dhbw-thesis:0.3.0": (
   dhbw-template,
   vglcite,
   vglcites,

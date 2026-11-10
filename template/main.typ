@@ -1,4 +1,4 @@
-#import "@preview/marius-dhbw-thesis:0.2.0": (
+#import "@preview/marius-dhbw-thesis:0.3.0": (
   dhbw-template,
   vglcite,
   vglcites,
