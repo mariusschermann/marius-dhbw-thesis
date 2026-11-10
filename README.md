@@ -274,6 +274,9 @@ This complete example uses the `mustermann2025` entry from the bibliography
 example below. User-provided metadata and content must be supplied in English;
 the template does not translate them. For local development, replace the
 package import with `../lib.typ` and compile with the repository as root.
+All metadata fields are optional. Missing or empty values are omitted from the
+title-page data grid without leaving blank rows. English metadata keys shown
+below can be used interchangeably with the existing German keys.
 
 ```typst
 #import "@preview/marius-dhbw-thesis:0.2.0": (
@@ -285,23 +288,20 @@ package import with `../lib.typ` and compile with the repository as root.
 #let english = true
 
 #let meta = (
-  art-der-arbeit: auto,
-  titel-der-arbeit: "Digital Transformation in Business",
-  titel-zeile1: [Digital Transformation in Business],
-  titel-zeile2: [],
-  autor-der-arbeit: "Alex Smith",
-  anschrift-zeile1: "10 Example Street",
-  anschrift-zeile2: "68163 Mannheim, Germany",
-  abteilung: "Digital Strategy",
-  firma: "Example Company, Mannheim",
-  studienjahrgang: "2023",
-  kurs: "WDBM23A",
-  studienrichtung: "Digital Business Management",
-  matrikelnummer: "1234567",
-  studiengangsleiter: "Prof. Taylor",
-  wiss-betreuer: "Dr. Morgan",
-  firmen-betreuer: "Robin Jones",
-  abgabedatum: "24 October 2026",
+  work-type: auto,
+  thesis-title: "Digital Transformation in Business",
+  title-line-one: [Digital Transformation in Business],
+  author: "Alex Smith",
+  address-line-one: "10 Example Street",
+  address-line-two: "68163 Mannheim, Germany",
+  company: "Example Company, Mannheim",
+  cohort: "2023",
+  course: "WDBM23A",
+  field-of-study: "Digital Business Management",
+  student-id: "1234567",
+  head-of-degree-programme: "Prof. Taylor",
+  academic-supervisor: "Dr. Morgan",
+  submission-date: "24 October 2026",
 )
 
 #let acronyms = (("API", "Application Programming Interface"),)

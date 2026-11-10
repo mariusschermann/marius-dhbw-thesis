@@ -8,25 +8,7 @@
   // ----------------------------------------------------------
   // Metadaten
   // ----------------------------------------------------------
-  meta: (
-    art-der-arbeit: auto,
-    titel-der-arbeit: "",
-    titel-zeile1: [],
-    titel-zeile2: [],
-    autor-der-arbeit: "",
-    anschrift-zeile1: "",
-    anschrift-zeile2: "",
-    abteilung: "",
-    firma: "",
-    studienjahrgang: "",
-    kurs: "",
-    studienrichtung: "Digital Business Management",
-    matrikelnummer: "",
-    studiengangsleiter: "",
-    wiss-betreuer: "",
-    firmen-betreuer: "",
-    abgabedatum: "",
-  ),
+  meta: (:),
 
   // ----------------------------------------------------------
   // Allgemeines Seitenlayout
@@ -168,6 +150,39 @@
     german
   }
 
+  let metadata-value(german-key, english-key, default-value) = meta.at(
+    english-key,
+    default: meta.at(german-key, default: default-value),
+  )
+
+  let resolved-meta = (
+    art-der-arbeit: metadata-value("art-der-arbeit", "work-type", auto),
+    titel-der-arbeit: metadata-value("titel-der-arbeit", "thesis-title", ""),
+    titel-zeile1: metadata-value("titel-zeile1", "title-line-one", []),
+    titel-zeile2: metadata-value("titel-zeile2", "title-line-two", []),
+    autor-der-arbeit: metadata-value("autor-der-arbeit", "author", ""),
+    anschrift-zeile1: metadata-value("anschrift-zeile1", "address-line-one", ""),
+    anschrift-zeile2: metadata-value("anschrift-zeile2", "address-line-two", ""),
+    abteilung: metadata-value("abteilung", "department", ""),
+    firma: metadata-value("firma", "company", ""),
+    studienjahrgang: metadata-value("studienjahrgang", "cohort", ""),
+    kurs: metadata-value("kurs", "course", ""),
+    studienrichtung: metadata-value(
+      "studienrichtung",
+      "field-of-study",
+      "Digital Business Management",
+    ),
+    matrikelnummer: metadata-value("matrikelnummer", "student-id", ""),
+    studiengangsleiter: metadata-value(
+      "studiengangsleiter",
+      "head-of-degree-programme",
+      "",
+    ),
+    wiss-betreuer: metadata-value("wiss-betreuer", "academic-supervisor", ""),
+    firmen-betreuer: metadata-value("firmen-betreuer", "company-supervisor", ""),
+    abgabedatum: metadata-value("abgabedatum", "submission-date", ""),
+  )
+
   let resolve-localized(value, german, english-text) = if value == auto {
     localized(german, english-text)
   } else {
@@ -236,11 +251,11 @@
     [Studienrichtung BWL –],
   )
   let resolved-work-type = resolve-localized(
-    meta.art-der-arbeit,
+    resolved-meta.art-der-arbeit,
     [Bachelorarbeit],
     [Bachelor's Thesis],
   )
-  let study-cohort = meta.at("studienjahrgang", default: "")
+  let study-cohort = resolved-meta.studienjahrgang
 
   // ==========================================================
   // Globales Layout
@@ -349,6 +364,65 @@
     ]
   ]
 
+  let has-value(value) = value != none and value != "" and value != []
+  let title-label(german, english-text) = text(
+    weight: "semibold",
+    localized(german, english-text),
+  )
+
+  let submitted-by = (
+    resolved-meta.autor-der-arbeit,
+    resolved-meta.anschrift-zeile1,
+    resolved-meta.anschrift-zeile2,
+  ).filter(has-value).join(linebreak())
+
+  let cohort-and-course = (
+    study-cohort,
+    resolved-meta.kurs,
+  ).filter(has-value).join(" / ")
+
+  let title-data-rows = (
+    (
+      title-label([Eingereicht von:], [Submitted by:]),
+      submitted-by,
+    ),
+    (
+      title-label([Matrikelnummer:], [Student ID:]),
+      resolved-meta.matrikelnummer,
+    ),
+    (
+      title-label([Firma:], [Company:]),
+      resolved-meta.firma,
+    ),
+    (
+      title-label([Abteilung:], [Department:]),
+      resolved-meta.abteilung,
+    ),
+    (
+      title-label(
+        if has-value(study-cohort) { [Studienjahrgang / Kurs:] } else { [Kurs:] },
+        if has-value(study-cohort) { [Cohort / Course:] } else { [Course:] },
+      ),
+      cohort-and-course,
+    ),
+    (
+      title-label([Studiengangsleiter:], [Head of Degree Programme:]),
+      resolved-meta.studiengangsleiter,
+    ),
+    (
+      title-label([Wissenschaftliche Betreuung:], [Academic Supervisor:]),
+      resolved-meta.wiss-betreuer,
+    ),
+    (
+      title-label([Betriebliche Betreuung:], [Company Supervisor:]),
+      resolved-meta.firmen-betreuer,
+    ),
+    (
+      title-label([Abgabetermin:], [Submission Date:]),
+      resolved-meta.abgabedatum,
+    ),
+  ).filter(row => has-value(row.at(1)))
+
   // ==========================================================
   // Titelblatt
   // ==========================================================
@@ -383,7 +457,7 @@
       #text(size: institution-font-size)[
         #resolved-institution-name \
         #resolved-faculty-name \
-        #resolved-study-prefix #meta.studienrichtung
+        #resolved-study-prefix #resolved-meta.studienrichtung
       ]
 
       #v(4em)
@@ -399,8 +473,8 @@
     #v(8mm)
 
     #title-box(
-      meta.titel-zeile1,
-      meta.titel-zeile2,
+      resolved-meta.titel-zeile1,
+      resolved-meta.titel-zeile2,
     )
 
     #v(7em)
@@ -419,76 +493,7 @@
       row-gutter: title-data-row-gutter,
       align: (left + top, left + top),
 
-      [
-        #text(weight: "semibold")[
-          #localized([Eingereicht von:], [Submitted by:])
-        ]
-      ],
-      [
-        #meta.autor-der-arbeit \
-        #meta.anschrift-zeile1 \
-        #meta.anschrift-zeile2
-      ],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Matrikelnummer:], [Student ID:])
-        ]
-      ],
-      [#meta.matrikelnummer],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Firma:], [Company:])
-        ]
-      ],
-      [#meta.firma],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Abteilung:], [Department:])
-        ]
-      ],
-      [#meta.abteilung],
-
-      [
-        #text(weight: "semibold")[
-          #if study-cohort != "" {
-            localized([Studienjahrgang / Kurs:], [Cohort / Course:])
-          } else {
-            localized([Kurs:], [Course:])
-          }
-        ]
-      ],
-      [#if study-cohort != "" { [#study-cohort / ] }#meta.kurs],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Studiengangsleiter:], [Head of Degree Programme:])
-        ]
-      ],
-      [#meta.studiengangsleiter],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Wissenschaftliche Betreuung:], [Academic Supervisor:])
-        ]
-      ],
-      [#meta.wiss-betreuer],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Betriebliche Betreuung:], [Company Supervisor:])
-        ]
-      ],
-      [#meta.firmen-betreuer],
-
-      [
-        #text(weight: "semibold")[
-          #localized([Abgabetermin:], [Submission Date:])
-        ]
-      ],
-      [#meta.abgabedatum],
+      ..title-data-rows.flatten(),
     )
   ]
 
@@ -531,7 +536,7 @@
 
       #v(0.3em)
 
-      #quote(emph(meta.titel-der-arbeit))
+      #quote(emph(resolved-meta.titel-der-arbeit))
 
       #v(0.3em)
 
@@ -546,7 +551,7 @@
 
       #v(0.3em)
 
-      „#emph[#meta.titel-der-arbeit]“
+      „#emph[#resolved-meta.titel-der-arbeit]“
 
       #v(0.3em)
 
@@ -581,7 +586,7 @@
       [
         #line(length: 100%)
         #v(0.2cm)
-        #meta.autor-der-arbeit
+        #resolved-meta.autor-der-arbeit
       ],
     )
   ]
@@ -609,17 +614,17 @@
 
   if abstract != none {
     front-heading(resolved-abstract-title)
-    strong(meta.titel-der-arbeit)
+    strong(resolved-meta.titel-der-arbeit)
     parbreak()
-    meta.autor-der-arbeit
+    resolved-meta.autor-der-arbeit
     linebreak()
-    [#localized([Matrikelnummer:], [Student ID:]) #meta.matrikelnummer]
+    [#localized([Matrikelnummer:], [Student ID:]) #resolved-meta.matrikelnummer]
     linebreak()
     if study-cohort != "" {
       [#localized([Studienjahrgang:], [Cohort:]) #study-cohort]
       linebreak()
     }
-    [#localized([Kurs:], [Course:]) #meta.kurs]
+    [#localized([Kurs:], [Course:]) #resolved-meta.kurs]
     v(1em)
     abstract
     pagebreak()
